@@ -1,0 +1,2538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Manisarmi Expense Tracker & Stock Manager</title>
+  
+  <!-- PWA Web App Manifest & Mobile App Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* CSS Variables & Safe Area Adjustments */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+      --panel-bg: rgba(30, 41, 59, 0.45);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --primary-glow: rgba(139, 92, 246, 0.4);
+      --secondary: #10b981;
+      --secondary-hover: #059669;
+      --secondary-glow: rgba(16, 185, 129, 0.4);
+      --accent-rose: #f43f5e;
+      --accent-rose-hover: #e11d48;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --input-border: rgba(255, 255, 255, 0.1);
+      --input-focus: #8b5cf6;
+      --table-header: rgba(15, 23, 42, 0.4);
+      --transition-speed: 0.25s;
+
+      /* Safe area inset support */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-tap-highlight-color: transparent;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Prevent auto-zooming on mobile iOS Safari */
+    input, select, textarea {
+      font-size: 1rem;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+
+    /* Container & Header */
+    .container {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: calc(1.25rem + var(--sat)) calc(1.25rem + var(--sar)) calc(1.25rem + var(--sab)) calc(1.25rem + var(--sal));
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--primary-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-logo i {
+      font-size: 1.25rem;
+      color: #fff;
+    }
+
+    .brand-info h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Tab Navigation */
+    .nav-tabs {
+      display: flex;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--panel-border);
+      padding: 5px;
+      border-radius: 14px;
+      gap: 6px;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.65rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-height: 42px;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    /* Main View Area */
+    .view-content {
+      flex: 1;
+      position: relative;
+      min-height: 450px;
+    }
+
+    .view-pane {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: fadeIn 0.4s forwards;
+    }
+
+    .view-pane.active {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    .panel-title i {
+      color: var(--primary);
+    }
+
+    /* Two Columns Grid layout */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all var(--transition-speed) ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px var(--primary-glow);
+    }
+
+    .btn-success {
+      background: var(--secondary);
+      box-shadow: 0 4px 14px var(--secondary-glow);
+    }
+
+    .btn-success:hover {
+      background: var(--secondary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px var(--secondary-glow);
+    }
+
+    .btn-danger {
+      background: var(--accent-rose);
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--accent-rose-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(15, 23, 42, 0.25);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--table-header);
+      padding: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .action-badge {
+      display: inline-flex;
+      gap: 0.4rem;
+    }
+
+    /* Autocomplete Suggestions box styling */
+    .autocomplete-wrapper {
+      position: relative;
+    }
+
+    .suggestions-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      margin-top: 5px;
+      max-height: 180px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .suggestion-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      transition: background var(--transition-speed);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .suggestion-item:hover, .suggestion-item.selected {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .suggestion-name {
+      font-weight: 600;
+    }
+
+    .suggestion-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .suggestion-item:hover .suggestion-meta {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Billing specific styling */
+    .bill-summary {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-total-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .summary-total-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--secondary);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .total-words {
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      line-height: 1.4;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      text-transform: capitalize;
+    }
+
+    .bill-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Search bar controls inside lists */
+    .search-bar-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-input-wrapper input {
+      padding-left: 2.5rem;
+    }
+
+    .expense-actions-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      width: 100%;
+    }
+
+    .expense-actions-wrapper .search-input-wrapper {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .expense-btns-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ledger-summary {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .ledger-total-box {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .ledger-total-box i {
+      color: var(--secondary);
+      font-size: 1.15rem;
+    }
+
+    .ledger-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #ledger-grand-total {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--secondary);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .stock-search-wrapper {
+      max-width: 250px;
+      margin-bottom: 0;
+      width: 100%;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-primary {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    /* PWA Install Button Styles */
+    .pwa-install-btn {
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+      border: none;
+      box-shadow: 0 4px 14px var(--secondary-glow);
+      font-weight: 700;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .pwa-install-btn:hover {
+      box-shadow: 0 6px 18px var(--secondary-glow);
+      transform: translateY(-2px);
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--panel-border);
+      margin-top: auto;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: #1e293b;
+      border-left: 4px solid var(--primary);
+      color: #fff;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 280px;
+      max-width: 420px;
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      border-left-color: var(--secondary);
+    }
+
+    .toast.danger {
+      border-left-color: var(--accent-rose);
+    }
+
+    .toast i {
+      font-size: 1.1rem;
+    }
+
+    /* ==========================================
+       MEDIA QUERIES (DESKTOP, TABLET, MOBILE)
+       ========================================== */
+
+    /* 1. Ultrawide Desktop (1400px+) */
+    @media (min-width: 1400px) {
+      .container {
+        max-width: 1440px;
+        padding: 2rem;
+      }
+      .grid-2col {
+        grid-template-columns: 380px 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* 2. Large Laptop / Desktop (1025px - 1399px) */
+    @media (max-width: 1399px) and (min-width: 1025px) {
+      .grid-2col {
+        grid-template-columns: 340px 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* 3. Tablet Landscape / Small Laptop (768px - 1024px) */
+    @media (max-width: 1024px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .stock-search-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    /* 4. Mobile & Tablet Devices (< 768px) */
+    @media (max-width: 767px) {
+      header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.2rem;
+        padding-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .brand {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .brand-info h1 {
+        font-size: 1.25rem;
+      }
+
+      .nav-tabs {
+        width: 100%;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px;
+        padding: 5px;
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 14px;
+        scrollbar-width: none;
+      }
+      .nav-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab-btn {
+        flex: 1 0 auto;
+        justify-content: center;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        min-height: 44px;
+      }
+
+      .panel {
+        padding: 1.15rem;
+        border-radius: 14px;
+      }
+
+      .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+      }
+
+      .panel-title {
+        font-size: 1.05rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+
+      .bill-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .bill-actions .btn {
+        width: 100%;
+      }
+
+      .expense-actions-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        width: 100%;
+      }
+
+      .expense-actions-wrapper .search-input-wrapper {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .expense-btns-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .expense-btns-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ledger-summary {
+        align-items: stretch !important;
+        margin-top: 1.25rem;
+      }
+
+      .ledger-total-box {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.85rem 1rem;
+      }
+
+      .ledger-summary .total-words {
+        text-align: left !important;
+        width: 100% !important;
+        max-width: none !important;
+      }
+
+      .toast-container {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+      }
+
+      .toast {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        padding: 0.85rem 1rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* 5. Mobile Cards Transformation for Tables (< 640px) */
+    @media (max-width: 640px) {
+      .table-container {
+        border: none;
+        background: transparent;
+        overflow-x: visible;
+      }
+
+      .responsive-table,
+      .responsive-table thead,
+      .responsive-table tbody,
+      .responsive-table th,
+      .responsive-table td,
+      .responsive-table tr {
+        display: block;
+        width: 100%;
+        min-width: 0 !important;
+      }
+
+      .responsive-table thead {
+        display: none;
+      }
+
+      .responsive-table tr {
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        margin-bottom: 0.85rem;
+        padding: 0.85rem 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .responsive-table tr:hover td {
+        background: transparent;
+      }
+
+      .responsive-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.55rem 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+        text-align: right !important;
+        font-size: 0.88rem;
+      }
+
+      .responsive-table td:last-child {
+        border-bottom: none;
+        padding-top: 0.75rem;
+        justify-content: flex-end;
+      }
+
+      .responsive-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        margin-right: 1rem;
+        flex-shrink: 0;
+      }
+
+      .action-badge {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    /* 6. Small Mobile Screens (< 540px) */
+    @media (max-width: 539px) {
+      .container {
+        padding: 0.85rem 0.65rem;
+      }
+
+      .brand-info h1 {
+        font-size: 1.1rem;
+      }
+
+      .brand-info p {
+        font-size: 0.7rem;
+      }
+
+      .expense-actions-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .expense-actions-wrapper .btn {
+        width: 100%;
+      }
+
+      .panel form .btn-primary,
+      .panel form .btn-success,
+      .panel form .btn-secondary {
+        width: 100%;
+      }
+
+      .btn {
+        min-height: 44px;
+      }
+
+      .btn-small {
+        padding: 0.45rem 0.75rem;
+        min-height: 36px;
+        font-size: 0.75rem;
+        width: auto !important;
+      }
+    }
+
+    /* Empty state messages */
+    .empty-state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Receipt Print Styling (Hidden during screen viewing) */
+    #print-receipt-wrapper {
+      display: none;
+    }
+
+    /* Print styling rules */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 20mm;
+      }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Hide screen-only containers completely so they occupy zero space */
+      .container, footer, .toast-container, .nav-tabs, header, .view-content {
+        display: none !important;
+      }
+
+      /* Display print container */
+      #print-receipt-wrapper {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        color: #000 !important;
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .receipt-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #000;
+        padding-bottom: 1.5rem;
+      }
+
+      .receipt-title {
+        font-size: 24pt;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+      }
+
+      .receipt-meta {
+        font-size: 11pt;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+      }
+
+      .receipt-details-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        font-size: 11pt;
+        line-height: 1.6;
+        border-bottom: 1px solid #cbd5e1;
+        padding-bottom: 1rem;
+      }
+
+      .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2.5rem;
+      }
+
+      .receipt-table th {
+        background: #f1f5f9 !important;
+        color: #000 !important;
+        font-weight: 700;
+        padding: 0.75rem 1rem;
+        border: 1px solid #cbd5e1;
+        font-size: 11pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .receipt-table td {
+        padding: 0.75rem 1rem;
+        border: 1px solid #cbd5e1;
+        color: #000 !important;
+        font-size: 11pt;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .receipt-totals {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .receipt-total-container {
+        width: 100%;
+        max-width: 400px;
+        border-top: 2px solid #000;
+        padding-top: 1rem;
+      }
+
+      .receipt-total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14pt;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+
+      .receipt-words {
+        font-size: 10pt;
+        font-style: italic;
+        margin-top: 0.5rem;
+        text-transform: capitalize;
+        color: #475569;
+        text-align: right;
+        line-height: 1.4;
+      }
+
+      .receipt-footer {
+        text-align: center;
+        margin-top: 5rem;
+        font-size: 13pt;
+        font-weight: 700;
+        border-top: 1px solid #cbd5e1;
+        padding-top: 1.5rem;
+        letter-spacing: 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <div class="brand-info">
+          <h1>Manisarmi Expense Tracker</h1>
+          <p>Dharan-8, Nepal | Stock & Expense Management</p>
+        </div>
+      </div>
+
+      <!-- PWA Mobile Install Action Button -->
+      <button id="pwa-install-btn" class="btn btn-small pwa-install-btn" onclick="triggerPwaInstall()">
+        <i class="fa-solid fa-download"></i> Install App
+      </button>
+
+      <!-- Tab Controls -->
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('stock-view')">
+          <i class="fa-solid fa-boxes-stacked"></i> Stock Manager
+        </button>
+        <button class="tab-btn" onclick="switchTab('billing-view')">
+          <i class="fa-solid fa-receipt"></i> Billing Terminal
+        </button>
+        <button class="tab-btn" onclick="switchTab('expense-view')">
+          <i class="fa-solid fa-chart-line"></i> Expense Ledger
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Content Panels -->
+    <main class="view-content">
+
+      <!-- View 1: Stock Manager (Home) -->
+      <div id="stock-view" class="view-pane active">
+        <div class="grid-2col">
+          <!-- Left Column: Add / Edit Form -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title" id="stock-form-title">
+                <i class="fa-solid fa-circle-plus"></i> Add New Stock Item
+              </h3>
+            </div>
+            <form id="stock-form" onsubmit="handleStockSave(event)">
+              <input type="hidden" id="stock-edit-id" value="">
+              
+              <div class="form-group">
+                <label for="stock-main-category">Main Category</label>
+                <input 
+                  type="text" 
+                  id="stock-main-category" 
+                  placeholder="e.g. Drinks, Snacks, Stationery" 
+                  required
+                >
+              </div>
+              
+              <div class="form-group">
+                <label for="stock-item-name">Item Name (Second Category)</label>
+                <input 
+                  type="text" 
+                  id="stock-item-name" 
+                  placeholder="e.g. Coke, Lay's Chips, Notebook" 
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="stock-price">Price (Rs.)</label>
+                <input 
+                  type="number" 
+                  id="stock-price" 
+                  placeholder="0.00" 
+                  step="0.01" 
+                  min="0.01" 
+                  required
+                >
+              </div>
+
+              <div class="form-row" style="margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="resetStockForm()">Clear</button>
+                <button type="submit" class="btn btn-primary" id="stock-save-btn">
+                  <i class="fa-solid fa-floppy-disk"></i> Save Item
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right Column: Stock List & Search -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-list"></i> Stock List
+              </h3>
+              <div class="search-input-wrapper stock-search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input 
+                  type="text" 
+                  id="stock-search" 
+                  placeholder="Search stock..." 
+                  oninput="renderStockTable()"
+                >
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>Main Category</th>
+                    <th>Name</th>
+                    <th>Price (Rs.)</th>
+                    <th style="width: 150px; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="stock-table-body">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+              <div id="stock-empty" class="empty-state" style="display: none;">
+                <i class="fa-solid fa-box-open"></i>
+                <p>No stock items found. Add some on the left form!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- View 2: Billing Page -->
+      <div id="billing-view" class="view-pane">
+        <div class="grid-2col">
+          <!-- Left Column: Billing Form -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-cart-shopping"></i> Add to Bill
+              </h3>
+            </div>
+            <form id="billing-form" onsubmit="handleBillAdd(event)">
+              <!-- Search Item Input -->
+              <div class="form-group autocomplete-wrapper">
+                <label for="billing-search-name">Search Item By Name</label>
+                <div style="position: relative;">
+                  <input 
+                    type="text" 
+                    id="billing-search-name" 
+                    placeholder="Type name to search..." 
+                    oninput="handleBillingSearch(event)"
+                    autocomplete="off"
+                  >
+                  <!-- Suggestion popover box -->
+                  <div class="suggestions-list" id="billing-suggestions" style="display: none;"></div>
+                </div>
+              </div>
+
+              <!-- Selected Item Dropdown & Price -->
+              <div class="form-group">
+                <label for="billing-dropdown">Selected Item</label>
+                <select id="billing-dropdown" onchange="handleBillingSelectChange(event)" required>
+                  <option value="" disabled selected>-- Select an Item --</option>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billing-price">Price (Rs.)</label>
+                  <input 
+                    type="number" 
+                    id="billing-price" 
+                    placeholder="0.00" 
+                    step="0.01" 
+                    readonly 
+                    style="background: rgba(15, 23, 42, 0.4); cursor: not-allowed;"
+                  >
+                </div>
+                <div class="form-group">
+                  <label for="billing-qty">Quantity</label>
+                  <input 
+                    type="number" 
+                    id="billing-qty" 
+                    value="1" 
+                    min="1" 
+                    step="1" 
+                    required
+                  >
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success btn-block" style="margin-top: 1rem;">
+                <i class="fa-solid fa-plus"></i> Add Item
+              </button>
+            </form>
+          </div>
+
+          <!-- Right Column: Current Bill details -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-receipt"></i> Active Bill Basket
+              </h3>
+              <button class="btn btn-secondary btn-small" onclick="clearBillBasket()">
+                <i class="fa-solid fa-trash-can"></i> Clear Basket
+              </button>
+            </div>
+
+            <!-- Basket Table -->
+            <div class="table-container">
+              <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th style="width: 100px;">Quantity</th>
+                    <th>Total</th>
+                    <th style="width: 120px; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="bill-table-body">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+              <div id="bill-empty" class="empty-state">
+                <i class="fa-solid fa-calculator"></i>
+                <p>Basket is empty. Search and add items from the panel.</p>
+              </div>
+            </div>
+
+            <!-- Bill Totals in Numbers and Words -->
+            <div class="bill-summary">
+              <div class="summary-row">
+                <span class="summary-total-label">Grand Total:</span>
+                <span class="summary-total-value" id="bill-grand-total">Rs. 0.00</span>
+              </div>
+              <div class="total-words" id="bill-total-words">
+                Rupees Zero Only
+              </div>
+            </div>
+
+            <!-- Bill Actions -->
+            <div class="bill-actions">
+              <button class="btn btn-primary" style="flex: 1;" onclick="handleCheckout()">
+                <i class="fa-solid fa-cash-register"></i> Checkout
+              </button>
+              <button class="btn btn-success" style="flex: 1;" onclick="handlePrint()">
+                <i class="fa-solid fa-print"></i> Print Bill
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- View 3: Expense Tracking Page -->
+      <div id="expense-view" class="view-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">
+              <i class="fa-solid fa-chart-line"></i> Expense Log & History
+            </h3>
+            
+            <div class="expense-actions-wrapper">
+              <!-- Search bar inside Expense Log -->
+              <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input 
+                  type="text" 
+                  id="expense-search" 
+                  placeholder="Search ledger..." 
+                  oninput="renderLedgerTable()"
+                >
+              </div>
+
+              <div class="expense-btns-group">
+                <!-- Export CSV Button -->
+                <button class="btn btn-success" onclick="exportLedgerToCSV()">
+                  <i class="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+
+                <!-- Print Ledger Button -->
+                <button class="btn btn-primary" onclick="handlePrintLedger()">
+                  <i class="fa-solid fa-print"></i> Print Ledger
+                </button>
+                
+                <!-- Clear All logs Button -->
+                <button class="btn btn-danger" onclick="clearLedgerHistory()">
+                  <i class="fa-solid fa-circle-xmark"></i> Clear All History
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ledger Table -->
+          <div class="table-container">
+            <table class="responsive-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Price (Rs.)</th>
+                  <th>Quantity</th>
+                  <th>Total (Rs.)</th>
+                  <th>Date & Time (BS / AD)</th>
+                  <th style="width: 150px; text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+            <div id="ledger-empty" class="empty-state">
+              <i class="fa-solid fa-folder-open"></i>
+              <p>No transactions logged yet. Complete checkouts in the Billing Terminal.</p>
+            </div>
+          </div>
+          
+          <!-- Ledger Total Summary -->
+          <div class="ledger-summary">
+            <div class="ledger-total-box">
+              <i class="fa-solid fa-coins"></i>
+              <span class="ledger-label">Total Expense:</span>
+              <span id="ledger-grand-total">Rs. 0.00</span>
+            </div>
+            <div class="total-words" id="ledger-total-words">
+              Rupees Zero Only
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2026 Manisarmi Expense System. Crafted for high-efficiency monitoring and accounting.</p>
+    </footer>
+  </div>
+
+  <!-- Receipt container only used during Print rendering -->
+  <div id="print-receipt-wrapper">
+    <!-- Generated dynamically during print -->
+  </div>
+
+
+  <!-- Core Application Scripts -->
+  <script>
+    // ==========================================
+    // 1. STATE & STORAGE MANAGEMENT
+    // ==========================================
+    let stockList = JSON.parse(localStorage.getItem('manisarmi_stock')) || [];
+    let billBasket = JSON.parse(localStorage.getItem('manisarmi_basket')) || [];
+    let expenseLedger = JSON.parse(localStorage.getItem('manisarmi_ledger')) || [];
+
+    // Save States Helper
+    function saveToStorage() {
+      localStorage.setItem('manisarmi_stock', JSON.stringify(stockList));
+      localStorage.setItem('manisarmi_basket', JSON.stringify(billBasket));
+      localStorage.setItem('manisarmi_ledger', JSON.stringify(expenseLedger));
+    }
+
+    // ==========================================
+    // 2. TOAST NOTIFICATIONS ENGINE
+    // ==========================================
+    function showToast(message, type = 'primary') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'fa-circle-info';
+      if (type === 'success') icon = 'fa-circle-check';
+      if (type === 'danger') icon = 'fa-triangle-exclamation';
+
+      toast.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Trigger CSS entry animation
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Auto remove after 3.5s
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // ==========================================
+    // 3. SPA TAB CONTROLLER
+    // ==========================================
+    function switchTab(viewId) {
+      document.querySelectorAll('.view-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show target view
+      const targetPane = document.getElementById(viewId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+      
+      // Find button associated with tab action
+      const btnMap = {
+        'stock-view': 0,
+        'billing-view': 1,
+        'expense-view': 2
+      };
+      const btnIndex = btnMap[viewId];
+      const activeBtn = document.querySelectorAll('.tab-btn')[btnIndex];
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+
+      // Refresh corresponding displays
+      if (viewId === 'stock-view') {
+        renderStockTable();
+      } else if (viewId === 'billing-view') {
+        populateBillingDropdown();
+        renderBillTable();
+      } else if (viewId === 'expense-view') {
+        renderLedgerTable();
+      }
+    }
+
+    // ==========================================
+    // 4. NEPALI BIKRAM SAMVAT CALENDAR UTILITY
+    // ==========================================
+    // Mapping of BS years to months sizes and Gregorian start dates (Baishakh 1st)
+    const bsTable = {
+      2080: { start: new Date('2023-04-14'), days: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30] },
+      2081: { start: new Date('2024-04-13'), days: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30] },
+      2082: { start: new Date('2025-04-14'), days: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30] },
+      2083: { start: new Date('2026-04-14'), days: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30] },
+      2084: { start: new Date('2027-04-14'), days: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30] },
+      2085: { start: new Date('2028-04-13'), days: [31, 32, 31, 32, 30, 31, 30, 30, 30, 30, 30, 29] },
+      2086: { start: new Date('2029-04-14'), days: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30] },
+      2087: { start: new Date('2030-04-14'), days: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30] },
+      2088: { start: new Date('2031-04-14'), days: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30] },
+      2089: { start: new Date('2032-04-13'), days: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30] },
+      2090: { start: new Date('2033-04-14'), days: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30] }
+    };
+
+    const nepaliMonths = [
+      "Baishakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin", 
+      "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
+    ];
+
+    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+    function toNepaliDigits(num) {
+      return num.toString().split('').map(digit => {
+        return isNaN(digit) ? digit : nepaliDigits[parseInt(digit)];
+      }).join('');
+    }
+
+    function convertToNepaliDateString(dateObj) {
+      try {
+        // Work on midday to prevent timezone offsets shifting local date calculations
+        const inputDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 12, 0, 0);
+        
+        let targetYear = null;
+        let diffDays = 0;
+        
+        // Find which BS year this Gregorian date falls in
+        for (const year in bsTable) {
+          const start = new Date(bsTable[year].start);
+          start.setHours(12, 0, 0);
+          
+          const nextYear = parseInt(year) + 1;
+          const end = bsTable[nextYear] ? new Date(bsTable[nextYear].start) : new Date(start.getTime() + 365 * 24 * 60 * 60 * 1000);
+          end.setHours(12, 0, 0);
+
+          if (inputDate >= start && inputDate < end) {
+            targetYear = parseInt(year);
+            diffDays = Math.round((inputDate.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+            break;
+          }
+        }
+
+        if (!targetYear) {
+          // Fallback to standard local Gregorian date if year is outside supported range
+          return dateObj.toLocaleDateString() + ' ' + formatTime(dateObj);
+        }
+
+        // Determine month and day in BS
+        const monthDays = bsTable[targetYear].days;
+        let monthIndex = 0;
+        let daysLeft = diffDays;
+
+        while (daysLeft >= monthDays[monthIndex]) {
+          daysLeft -= monthDays[monthIndex];
+          monthIndex++;
+        }
+
+        const targetDay = daysLeft + 1;
+        const monthName = nepaliMonths[monthIndex];
+        const formattedTime = formatTime(dateObj);
+
+        // Standard English notation with BS calendar parameters: 2083 Ashadh 9 (12:11 PM)
+        return `${targetYear} ${monthName} ${targetDay} (${formattedTime})`;
+      } catch (err) {
+        console.error("Nepali Date conversion error, fallback to English date.", err);
+        return dateObj.toLocaleString();
+      }
+    }
+
+    function formatTime(dateObj) {
+      let hours = dateObj.getHours();
+      let minutes = dateObj.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // ==========================================
+    // 5. NUMBER-TO-WORDS CONVERSION ENGINE
+    // ==========================================
+    function numberToWords(num) {
+      if (num === 0) return "Rupees Zero Only";
+      
+      // Separate integer and decimal
+      const parts = num.toFixed(2).split('.');
+      const rupees = parseInt(parts[0], 10);
+      const paisa = parseInt(parts[1], 10);
+
+      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", 
+                    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+      
+      function convertChunk(n) {
+        let chunkStr = "";
+        if (n >= 100) {
+          chunkStr += ones[Math.floor(n / 100)] + " Hundred ";
+          n %= 100;
+        }
+        if (n >= 20) {
+          chunkStr += tens[Math.floor(n / 10)] + " ";
+          n %= 10;
+        }
+        if (n > 0) {
+          chunkStr += ones[n] + " ";
+        }
+        return chunkStr.trim();
+      }
+
+      let wordOutput = "Rupees ";
+      let remaining = rupees;
+
+      // Handle crores (tens of millions)
+      if (remaining >= 10000000) {
+        wordOutput += convertChunk(Math.floor(remaining / 10000000)) + " Crore ";
+        remaining %= 10000000;
+      }
+
+      // Handle lakhs (hundred thousands)
+      if (remaining >= 100000) {
+        wordOutput += convertChunk(Math.floor(remaining / 100000)) + " Lakh ";
+        remaining %= 100000;
+      }
+
+      // Handle thousands
+      if (remaining >= 1000) {
+        wordOutput += convertChunk(Math.floor(remaining / 1000)) + " Thousand ";
+        remaining %= 1000;
+      }
+
+      // Handle remaining hundreds, tens, ones
+      if (remaining > 0) {
+        wordOutput += convertChunk(remaining) + " ";
+      }
+
+      wordOutput = wordOutput.trim();
+
+      // Handle Paisa decimal logic
+      if (paisa > 0) {
+        const paisaWords = convertChunk(paisa);
+        wordOutput += " and " + paisaWords + " Paisa";
+      }
+
+      wordOutput += " Only";
+      // Clean up extra double spaces
+      return wordOutput.replace(/\s+/g, ' ');
+    }
+
+    // ==========================================
+    // 6. STOCK MANAGER (HOME PAGE LOGIC)
+    // ==========================================
+    function renderStockTable() {
+      const searchVal = document.getElementById('stock-search').value.toLowerCase().trim();
+      const tbody = document.getElementById('stock-table-body');
+      const emptyDiv = document.getElementById('stock-empty');
+      
+      tbody.innerHTML = '';
+      
+      const filtered = stockList.filter(item => {
+        return item.mainCategory.toLowerCase().includes(searchVal) || 
+               item.name.toLowerCase().includes(searchVal);
+      });
+
+      if (filtered.length === 0) {
+        emptyDiv.style.display = 'block';
+        return;
+      } else {
+        emptyDiv.style.display = 'none';
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="Category"><span class="badge badge-primary">${escapeHtml(item.mainCategory)}</span></td>
+          <td data-label="Name" style="font-weight: 600;">${escapeHtml(item.name)}</td>
+          <td data-label="Price" style="color: var(--secondary); font-weight: 700;">Rs. ${item.price.toFixed(2)}</td>
+          <td data-label="Action" style="text-align: center;">
+            <div class="action-badge">
+              <button class="btn btn-secondary btn-small" onclick="editStockItem('${item.id}')">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+              <button class="btn btn-danger btn-small" onclick="deleteStockItem('${item.id}')">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleStockSave(event) {
+      event.preventDefault();
+      
+      const mainCat = document.getElementById('stock-main-category').value.trim();
+      const name = document.getElementById('stock-item-name').value.trim();
+      const price = parseFloat(document.getElementById('stock-price').value);
+      const editId = document.getElementById('stock-edit-id').value;
+
+      if (!mainCat || !name || isNaN(price) || price <= 0) {
+        showToast("Please fill all stock fields correctly.", "danger");
+        return;
+      }
+
+      // Check duplicate names (exclude self in edit mode)
+      const duplicate = stockList.some(item => 
+        item.name.toLowerCase() === name.toLowerCase() && item.id !== editId
+      );
+
+      if (duplicate) {
+        showToast(`Stock item named "${name}" already exists! Please use a unique name.`, "danger");
+        return;
+      }
+
+      if (editId) {
+        // Edit flow
+        const idx = stockList.findIndex(item => item.id === editId);
+        if (idx !== -1) {
+          // Store old name to sync updates in billing basket
+          const oldName = stockList[idx].name;
+          
+          stockList[idx].mainCategory = mainCat;
+          stockList[idx].name = name;
+          stockList[idx].price = price;
+          
+          // Update items in basket if their stock name matches
+          billBasket = billBasket.map(bItem => {
+            if (bItem.name === oldName) {
+              bItem.name = name;
+              bItem.price = price;
+              bItem.total = price * bItem.qty;
+            }
+            return bItem;
+          });
+
+          showToast("Stock item updated successfully!", "success");
+        }
+      } else {
+        // Create flow
+        const newItem = {
+          id: 'stock_' + Date.now() + Math.random().toString(36).substring(2, 6),
+          mainCategory: mainCat,
+          name: name,
+          price: price
+        };
+        stockList.push(newItem);
+        showToast("Stock item created successfully!", "success");
+      }
+
+      saveToStorage();
+      resetStockForm();
+      renderStockTable();
+      
+      // Auto-update elements in Billing
+      populateBillingDropdown();
+    }
+
+    function editStockItem(id) {
+      const item = stockList.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('stock-edit-id').value = item.id;
+      document.getElementById('stock-main-category').value = item.mainCategory;
+      document.getElementById('stock-item-name').value = item.name;
+      document.getElementById('stock-price').value = item.price;
+      
+      // Style changes to show editing status
+      document.getElementById('stock-form-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit Stock Item`;
+      document.getElementById('stock-save-btn').innerHTML = `<i class="fa-solid fa-circle-check"></i> Update Item`;
+      document.getElementById('stock-save-btn').className = "btn btn-success";
+      
+      // Smooth scroll to form
+      document.getElementById('stock-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteStockItem(id) {
+      const idx = stockList.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        const deletedName = stockList[idx].name;
+        stockList.splice(idx, 1);
+        
+        // Also remove from active billing basket
+        billBasket = billBasket.filter(bItem => bItem.name !== deletedName);
+        
+        saveToStorage();
+        renderStockTable();
+        showToast(`"${deletedName}" removed from stock.`, "danger");
+      }
+    }
+
+    function resetStockForm() {
+      document.getElementById('stock-edit-id').value = '';
+      document.getElementById('stock-form').reset();
+      document.getElementById('stock-form-title').innerHTML = `<i class="fa-solid fa-circle-plus"></i> Add New Stock Item`;
+      document.getElementById('stock-save-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Item`;
+      document.getElementById('stock-save-btn').className = "btn btn-primary";
+    }
+
+
+    // ==========================================
+    // 7. BILLING TERMINAL LOGIC
+    // ==========================================
+    function populateBillingDropdown() {
+      const dropdown = document.getElementById('billing-dropdown');
+      dropdown.innerHTML = '<option value="" disabled selected>-- Select an Item --</option>';
+      
+      stockList.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.name} (${item.mainCategory}) - Rs. ${item.price.toFixed(2)}`;
+        dropdown.appendChild(opt);
+      });
+    }
+
+    // Handles live searching as user types stock name
+    function handleBillingSearch(event) {
+      const query = event.target.value.toLowerCase().trim();
+      const suggestionsBox = document.getElementById('billing-suggestions');
+      suggestionsBox.innerHTML = '';
+      
+      if (!query) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+
+      const matches = stockList.filter(item => item.name.toLowerCase().includes(query));
+
+      if (matches.length === 0) {
+        suggestionsBox.innerHTML = '<div class="suggestion-item" style="cursor: default; color: var(--text-muted);">No match found</div>';
+        suggestionsBox.style.display = 'block';
+        return;
+      }
+
+      matches.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `
+          <span class="suggestion-name">${escapeHtml(item.name)}</span>
+          <span class="suggestion-meta">${escapeHtml(item.mainCategory)} - Rs. ${item.price.toFixed(2)}</span>
+        `;
+        
+        // Clicking suggestion populates search value, dropdown, price, and moves cursor to Quantity
+        div.onclick = () => {
+          selectItemFromSearch(item);
+        };
+        
+        suggestionsBox.appendChild(div);
+      });
+
+      suggestionsBox.style.display = 'block';
+    }
+
+    function selectItemFromSearch(item) {
+      document.getElementById('billing-search-name').value = item.name;
+      document.getElementById('billing-dropdown').value = item.id;
+      document.getElementById('billing-price').value = item.price.toFixed(2);
+      document.getElementById('billing-suggestions').style.display = 'none';
+      
+      // Auto select Quantity and focus
+      const qtyInput = document.getElementById('billing-qty');
+      qtyInput.focus();
+      qtyInput.select();
+    }
+
+    function handleBillingSelectChange(event) {
+      const itemId = event.target.value;
+      const item = stockList.find(i => i.id === itemId);
+      if (item) {
+        document.getElementById('billing-search-name').value = item.name;
+        document.getElementById('billing-price').value = item.price.toFixed(2);
+        
+        // Auto select Quantity and focus
+        const qtyInput = document.getElementById('billing-qty');
+        qtyInput.focus();
+        qtyInput.select();
+      }
+    }
+
+    // Hide suggestions list when clicking outside
+    document.addEventListener('click', (e) => {
+      const suggestionsBox = document.getElementById('billing-suggestions');
+      const searchInput = document.getElementById('billing-search-name');
+      if (suggestionsBox && e.target !== searchInput && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+
+    function handleBillAdd(event) {
+      event.preventDefault();
+      
+      const itemId = document.getElementById('billing-dropdown').value;
+      const qty = parseInt(document.getElementById('billing-qty').value, 10);
+      
+      const item = stockList.find(i => i.id === itemId);
+      
+      if (!item || isNaN(qty) || qty <= 0) {
+        showToast("Please select a stock item and specify valid quantity.", "danger");
+        return;
+      }
+
+      // Check if item is already in basket
+      const existingIdx = billBasket.findIndex(b => b.name.toLowerCase() === item.name.toLowerCase());
+      
+      if (existingIdx !== -1) {
+        // Add to quantity
+        billBasket[existingIdx].qty += qty;
+        billBasket[existingIdx].total = billBasket[existingIdx].qty * billBasket[existingIdx].price;
+        showToast(`Updated quantity of "${item.name}" in basket.`, "success");
+      } else {
+        // Create new item in basket
+        const basketItem = {
+          id: 'basket_' + Date.now() + Math.random().toString(36).substring(2, 6),
+          name: item.name,
+          price: item.price,
+          qty: qty,
+          total: item.price * qty
+        };
+        billBasket.push(basketItem);
+        showToast(`"${item.name}" added to basket.`, "success");
+      }
+
+      saveToStorage();
+      renderBillTable();
+      resetBillingForm();
+    }
+
+    function resetBillingForm() {
+      document.getElementById('billing-form').reset();
+      document.getElementById('billing-dropdown').value = '';
+      document.getElementById('billing-price').value = '';
+      document.getElementById('billing-qty').value = '1';
+    }
+
+    function renderBillTable() {
+      const tbody = document.getElementById('bill-table-body');
+      const emptyDiv = document.getElementById('bill-empty');
+      tbody.innerHTML = '';
+      
+      if (billBasket.length === 0) {
+        emptyDiv.style.display = 'block';
+        updateBillGrandTotal(0);
+        return;
+      } else {
+        emptyDiv.style.display = 'none';
+      }
+
+      let grandTotal = 0;
+
+      billBasket.forEach((item, index) => {
+        grandTotal += item.total;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="Name" style="font-weight: 600;">${escapeHtml(item.name)}</td>
+          <td data-label="Price">Rs. ${item.price.toFixed(2)}</td>
+          <td data-label="Quantity">
+            <input 
+              type="number" 
+              value="${item.qty}" 
+              min="1" 
+              step="1" 
+              class="billing-qty-edit-input" 
+              style="padding: 0.25rem 0.5rem; text-align: center; border-radius: 6px;"
+              onchange="updateBasketItemQty('${item.id}', this.value)"
+            >
+          </td>
+          <td data-label="Total" style="color: var(--secondary); font-weight: 700;">Rs. ${item.total.toFixed(2)}</td>
+          <td data-label="Action" style="text-align: center;">
+            <button class="btn btn-danger btn-small" onclick="deleteBasketItem('${item.id}')">
+              <i class="fa-solid fa-trash-can"></i> Remove
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateBillGrandTotal(grandTotal);
+    }
+
+    function updateBasketItemQty(id, newQtyVal) {
+      const qty = parseInt(newQtyVal, 10);
+      if (isNaN(qty) || qty <= 0) {
+        showToast("Invalid quantity. Restoring original quantity.", "danger");
+        renderBillTable();
+        return;
+      }
+      
+      const item = billBasket.find(i => i.id === id);
+      if (item) {
+        item.qty = qty;
+        item.total = item.price * qty;
+        saveToStorage();
+        renderBillTable();
+        showToast(`Quantity updated for "${item.name}"`, "success");
+      }
+    }
+
+    function deleteBasketItem(id) {
+      const idx = billBasket.findIndex(i => i.id === id);
+      if (idx !== -1) {
+        const name = billBasket[idx].name;
+        billBasket.splice(idx, 1);
+        saveToStorage();
+        renderBillTable();
+        showToast(`"${name}" removed from basket.`, "danger");
+      }
+    }
+
+    function clearBillBasket() {
+      if (billBasket.length === 0) return;
+      if (confirm("Are you sure you want to clear the entire billing basket?")) {
+        billBasket = [];
+        saveToStorage();
+        renderBillTable();
+        showToast("Billing basket cleared.", "danger");
+      }
+    }
+
+    function updateBillGrandTotal(total) {
+      document.getElementById('bill-grand-total').textContent = `Rs. ${total.toFixed(2)}`;
+      
+      // Update number in words
+      const words = numberToWords(total);
+      document.getElementById('bill-total-words').textContent = words;
+    }
+
+    // Commits the active bill basket to the main expense ledger
+    function handleCheckout() {
+      if (billBasket.length === 0) {
+        showToast("Basket is empty! Add items before checkout.", "danger");
+        return;
+      }
+
+      const checkoutTime = new Date();
+      
+      // Format B.S. Nepali Date
+      const nepaliDateStr = convertToNepaliDateString(checkoutTime);
+
+      // Record each item in basket as an expense entry
+      billBasket.forEach(bItem => {
+        const ledgerEntry = {
+          id: 'ledger_' + Date.now() + Math.random().toString(36).substring(2, 6),
+          name: bItem.name,
+          qty: bItem.qty,
+          price: bItem.price,
+          total: bItem.total,
+          dateRaw: checkoutTime.toISOString(), // Sort order key
+          dateFormatted: nepaliDateStr
+        };
+        expenseLedger.push(ledgerEntry);
+      });
+
+      // Clear basket state
+      billBasket = [];
+      saveToStorage();
+      
+      showToast("Checkout finalized successfully! Items saved to Expense Ledger.", "success");
+      
+      // Switch view and update
+      switchTab('expense-view');
+    }
+
+    function handlePrint() {
+      if (billBasket.length === 0) {
+        showToast("Basket is empty! Add items before printing a bill receipt.", "danger");
+        return;
+      }
+
+      // Generate printable billing receipt inside DOM
+      const printWrapper = document.getElementById('print-receipt-wrapper');
+      const now = new Date();
+      const nepaliDate = convertToNepaliDateString(now);
+      const totalAmount = billBasket.reduce((sum, item) => sum + item.total, 0);
+      const totalWords = numberToWords(totalAmount);
+      
+      const billNo = 'BILL-' + now.getFullYear() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0') + '-' + Math.floor(1000 + Math.random() * 9000);
+
+      let tableRows = '';
+      billBasket.forEach(item => {
+        tableRows += `
+          <tr>
+            <td>${item.name}</td>
+            <td class="text-right">Rs.${item.price.toFixed(2)}</td>
+            <td class="text-right">${item.qty}</td>
+            <td class="text-right">Rs.${item.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      printWrapper.innerHTML = `
+        <div class="receipt-header">
+          <div class="receipt-title">MANISARMI EXPENSE</div>
+          <div class="receipt-meta">NO: 9812261353</div>
+          <div class="receipt-meta">ADDRESS: DHARAN-8</div>
+        </div>
+        
+        <div class="receipt-details-row">
+          <div>
+            <strong>Billing Details:</strong><br>
+            Bill No: ${billNo}
+          </div>
+          <div style="text-align: right;">
+            <strong>Date & Time (B.S.):</strong><br>
+            ${nepaliDate}
+          </div>
+        </div>
+        
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Item Description</th>
+              <th class="text-right" style="width: 150px;">Unit Price</th>
+              <th class="text-right" style="width: 100px;">Quantity</th>
+              <th class="text-right" style="width: 150px;">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        
+        <div class="receipt-totals">
+          <div class="receipt-total-container">
+            <div class="receipt-total-row">
+              <span>Grand Total:</span>
+              <span>Rs. ${totalAmount.toFixed(2)}</span>
+            </div>
+            <div class="receipt-words">${totalWords}</div>
+          </div>
+        </div>
+        
+        <div class="receipt-footer">
+          THANKYOU
+        </div>
+      `;
+
+      // Call standard system print dialog
+      window.print();
+    }
+
+
+    // ==========================================
+    // 8. EXPENSE HISTORY LEDGER (3rd PAGE)
+    // ==========================================
+    function renderLedgerTable() {
+      const searchVal = document.getElementById('expense-search').value.toLowerCase().trim();
+      const tbody = document.getElementById('ledger-table-body');
+      const emptyDiv = document.getElementById('ledger-empty');
+      
+      tbody.innerHTML = '';
+      
+      // Sort newest checkouts first
+      const sortedLedger = [...expenseLedger].sort((a, b) => {
+        return new Date(b.dateRaw) - new Date(a.dateRaw);
+      });
+
+      const filtered = sortedLedger.filter(item => {
+        return item.name.toLowerCase().includes(searchVal);
+      });
+
+      // Calculate total ledger expense
+      let totalLedgerExpense = 0;
+      filtered.forEach(item => {
+        totalLedgerExpense += item.total;
+      });
+      document.getElementById('ledger-grand-total').textContent = `Rs. ${totalLedgerExpense.toFixed(2)}`;
+      document.getElementById('ledger-total-words').textContent = numberToWords(totalLedgerExpense);
+
+      if (filtered.length === 0) {
+        emptyDiv.style.display = 'block';
+        return;
+      } else {
+        emptyDiv.style.display = 'none';
+      }
+
+      filtered.forEach(item => {
+        const unitPrice = item.price !== undefined ? item.price : (item.qty ? (item.total / item.qty) : 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="Name" style="font-weight: 600;">${escapeHtml(item.name)}</td>
+          <td data-label="Price" style="color: var(--secondary); font-weight: 600;">Rs. ${unitPrice.toFixed(2)}</td>
+          <td data-label="Quantity">${item.qty}</td>
+          <td data-label="Total" style="color: var(--secondary); font-weight: 700;">Rs. ${item.total.toFixed(2)}</td>
+          <td data-label="Date & Time" style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(item.dateFormatted)}</td>
+          <td data-label="Action" style="text-align: center;">
+            <div class="action-badge">
+              <button class="btn btn-secondary btn-small" onclick="editLedgerEntry('${item.id}')">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+              <button class="btn btn-danger btn-small" onclick="deleteLedgerEntry('${item.id}')">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editLedgerEntry(id) {
+      const entry = expenseLedger.find(e => e.id === id);
+      if (!entry) return;
+
+      const newQtyStr = prompt(`Edit quantity for "${entry.name}":`, entry.qty);
+      if (newQtyStr === null) return; // cancelled
+
+      const newQty = parseInt(newQtyStr, 10);
+      if (isNaN(newQty) || newQty <= 0) {
+        showToast("Invalid quantity quantity entered. No change saved.", "danger");
+        return;
+      }
+
+      // Calculate unit price from previous values
+      const unitPrice = entry.total / entry.qty;
+      entry.qty = newQty;
+      entry.total = unitPrice * newQty;
+      
+      saveToStorage();
+      renderLedgerTable();
+      showToast("Ledger entry updated successfully!", "success");
+    }
+
+    function deleteLedgerEntry(id) {
+      const idx = expenseLedger.findIndex(e => e.id === id);
+      if (idx !== -1) {
+        const deletedName = expenseLedger[idx].name;
+        expenseLedger.splice(idx, 1);
+        saveToStorage();
+        renderLedgerTable();
+        showToast(`Transaction entry for "${deletedName}" deleted.`, "danger");
+      }
+    }
+
+    function clearLedgerHistory() {
+      if (expenseLedger.length === 0) return;
+      
+      if (confirm("WARNING: Are you sure you want to delete ALL expense records from history? This cannot be undone!")) {
+        expenseLedger = [];
+        saveToStorage();
+        renderLedgerTable();
+        showToast("All transaction histories cleared.", "danger");
+      }
+    }
+
+    // CSV Export Utility
+    function exportLedgerToCSV() {
+      if (expenseLedger.length === 0) {
+        showToast("No expense ledger entries to export.", "danger");
+        return;
+      }
+
+      let csvContent = "data:text/csv;charset=utf-8,";
+      // Header row
+      csvContent += "Item Name,Unit Price (Rs.),Quantity,Total Cost (Rs.),Date Created (BS/AD)\n";
+
+      expenseLedger.forEach(item => {
+        // Clean text content to avoid CSV formatting issues
+        const nameClean = item.name.replace(/"/g, '""');
+        const dateClean = item.dateFormatted.replace(/"/g, '""');
+        const unitPrice = item.price !== undefined ? item.price : (item.qty ? (item.total / item.qty) : 0);
+        csvContent += `"${nameClean}",${unitPrice.toFixed(2)},${item.qty},${item.total.toFixed(2)},"${dateClean}"\n`;
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const downloadLink = document.createElement("a");
+      downloadLink.setAttribute("href", encodedUri);
+      
+      const fileDate = new Date().toISOString().slice(0, 10);
+      downloadLink.setAttribute("download", `manisarmi_expenses_${fileDate}.csv`);
+      document.body.appendChild(downloadLink);
+      
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      showToast("Ledger exported successfully as CSV!", "success");
+    }
+
+    // Print Ledger Utility
+    function handlePrintLedger() {
+      const searchVal = document.getElementById('expense-search').value.toLowerCase().trim();
+      
+      const sortedLedger = [...expenseLedger].sort((a, b) => {
+        return new Date(b.dateRaw) - new Date(a.dateRaw);
+      });
+
+      const filtered = sortedLedger.filter(item => {
+        return item.name.toLowerCase().includes(searchVal);
+      });
+
+      if (filtered.length === 0) {
+        showToast("No expense ledger entries to print.", "danger");
+        return;
+      }
+
+      // Generate printable billing receipt inside DOM
+      const printWrapper = document.getElementById('print-receipt-wrapper');
+      const now = new Date();
+      const nepaliDate = convertToNepaliDateString(now);
+      const totalAmount = filtered.reduce((sum, item) => sum + item.total, 0);
+      const totalWords = numberToWords(totalAmount);
+      
+      let tableRows = '';
+      filtered.forEach(item => {
+        const unitPrice = item.price !== undefined ? item.price : (item.qty ? (item.total / item.qty) : 0);
+        tableRows += `
+          <tr>
+            <td>${escapeHtml(item.dateFormatted)}</td>
+            <td>${escapeHtml(item.name)}</td>
+            <td class="text-right">Rs.${unitPrice.toFixed(2)}</td>
+            <td class="text-right">${item.qty}</td>
+            <td class="text-right">Rs.${item.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      printWrapper.innerHTML = `
+        <div class="receipt-header">
+          <div class="receipt-title">MANISARMI EXPENSE LEDGER</div>
+          <div class="receipt-meta">NO: 9812261353</div>
+          <div class="receipt-meta">ADDRESS: DHARAN-8</div>
+        </div>
+        
+        <div class="receipt-details-row">
+          <div>
+            <strong>Ledger Report:</strong><br>
+            Generated: ${nepaliDate}
+          </div>
+          <div style="text-align: right;">
+            <strong>Total Entries:</strong><br>
+            ${filtered.length} entries
+          </div>
+        </div>
+        
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th style="text-align: left; width: 220px;">Date & Time</th>
+              <th style="text-align: left;">Item Description</th>
+              <th class="text-right" style="width: 120px;">Unit Price</th>
+              <th class="text-right" style="width: 90px;">Quantity</th>
+              <th class="text-right" style="width: 130px;">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        
+        <div class="receipt-totals">
+          <div class="receipt-total-container">
+            <div class="receipt-total-row">
+              <span>Grand Total:</span>
+              <span>Rs. ${totalAmount.toFixed(2)}</span>
+            </div>
+            <div class="receipt-words">${totalWords}</div>
+          </div>
+        </div>
+        
+        <div class="receipt-footer">
+          THANKYOU
+        </div>
+      `;
+
+      // Call standard system print dialog
+      window.print();
+    }
+
+
+    // ==========================================
+    // 9. HELPER UTILITIES
+    // ==========================================
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // ==========================================
+    // 10. INITIALIZATION
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      // Mock basic stock items if database is totally empty, for quick review/testability
+      if (stockList.length === 0) {
+        stockList = [
+          { id: 'stock_mock1', mainCategory: 'Drinks', name: 'Coke', price: 120 },
+          { id: 'stock_mock2', mainCategory: 'Drinks', name: 'Fanta', price: 120 },
+          { id: 'stock_mock3', mainCategory: 'Snacks', name: 'Lays Chips', price: 50 },
+          { id: 'stock_mock4', mainCategory: 'Stationery', name: 'Gel Pen', price: 25 }
+        ];
+        saveToStorage();
+      }
+
+      renderStockTable();
+      populateBillingDropdown();
+      renderBillTable();
+      renderLedgerTable();
+    });
+
+    // ==========================================
+    // 11. PWA SERVICE WORKER & MOBILE INSTALL ENGINE
+    // ==========================================
+    let deferredPrompt = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+          .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('pwa-install-btn');
+      if (installBtn) {
+        installBtn.style.display = 'inline-flex';
+        installBtn.classList.add('pulse-glow');
+      }
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('Thank you for installing Manisarmi PWA!', 'success');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert("To install Manisarmi App on iOS:\n\n1. Tap the Share button (square with arrow) in Safari.\n2. Scroll down & select 'Add to Home Screen'.\n3. Tap 'Add' to launch as a standalone app!");
+        } else {
+          showToast('To install: Open browser menu (3 dots) and select "Install app" or "Add to Home screen".', 'primary');
+        }
+      }
+    }
+
+    window.addEventListener('appinstalled', () => {
+      const installBtn = document.getElementById('pwa-install-btn');
+      if (installBtn) installBtn.style.display = 'none';
+      showToast('Manisarmi App installed successfully!', 'success');
+    });
+  </script>
+</body>
+</html>
